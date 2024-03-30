@@ -67,11 +67,15 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         debugText += text
     }
 
+    fun clearDebugText() {
+        debugText = "CLI Launcher\n"
+    }
+
     fun launchAppByName(appName: String, context: Context) {
-        appendDebugText("Lancio app: $appName\n")
+//        appendDebugText("Lancio app: $appName\n")
 
         val packageName = findAppPackageByName(appName, packageManager)
-        appendDebugText("Package: $packageName\n")
+//        appendDebugText("Package: $packageName\n")
 
         packageName?.let {
             val launchIntent = packageManager.getLaunchIntentForPackage(it)
@@ -85,6 +89,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun findAppPackageByName(appName: String, packageManager: PackageManager): String? {
+        clearDebugText()
         for (app in appList.value) {
             appendDebugText(app.loadLabel(packageManager).toString() + "\n")
             val label = app.loadLabel(packageManager).toString()
