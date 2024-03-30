@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +20,9 @@ import kotlinx.coroutines.launch
 class LauncherViewModel(application: Application) : AndroidViewModel(application) {
     var debugText by mutableStateOf("CLI Launcher\n")
 
-    private val _appList = MutableStateFlow<List<ApplicationInfo>>(emptyList())
-    var appList: StateFlow<List<ApplicationInfo>> = _appList
+    private val _appList = MutableStateFlow<List<AppInfo>>(emptyList())
+    val appList: StateFlow<List<AppInfo>> = _appList
+
 
     var packageManager: PackageManager
 
@@ -36,10 +38,18 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 addCategory(Intent.CATEGORY_LAUNCHER)
             }
             val launchableApps = packageManager.queryIntentActivities(mainIntent, 0)
-            val apps = launchableApps.map { it.activityInfo.applicationInfo }
+            val apps = launchableApps.map { resolveInfo ->
+                // Convertiamo ogni applicazione in un oggetto AppInfo
+                AppInfo(
+                    name = resolveInfo.loadLabel(packageManager).toString(),
+                    packageName = resolveInfo.activityInfo.packageName,
+                    icon = ImageBitmap(1, 1) // Placeholder, necessario sostituire con l'effettiva conversione dell'icona
+                )
+            }
             _appList.value = apps
         }
     }
+
 
 
 
@@ -74,7 +84,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     fun launchAppByName(appName: String, context: Context) {
 //        appendDebugText("Lancio app: $appName\n")
 
-        val packageName = findAppPackageByName(appName, packageManager)
+        val packageName = findAppPackageByName(appName)
 //        appendDebugText("Package: $packageName\n")
 
         packageName?.let {
@@ -88,15 +98,16 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun findAppPackageByName(appName: String, packageManager: PackageManager): String? {
+    fun findAppPackageByName(appName: String): String? {
         clearDebugText()
         for (app in appList.value) {
-            appendDebugText(app.loadLabel(packageManager).toString() + "\n")
-            val label = app.loadLabel(packageManager).toString()
+            val label = app.name // Usa direttamente il nome dell'app memorizzato in AppInfo
+            appendDebugText("$label\n")
             if (label.equals(appName, ignoreCase = true)) {
                 return app.packageName
             }
         }
         return null
     }
+
 }
