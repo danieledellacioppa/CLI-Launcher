@@ -3,6 +3,7 @@ package com.forteur.cli_launcher
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,26 +48,32 @@ fun AppConsoleLauncher(launcherViewModel: LauncherViewModel) {
     var inputText by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    LazyColumn(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize()
-    ) {
-        item {Text(text = launcherViewModel.debugText,modifier = Modifier.padding(bottom = 8.dp))}
-        item {TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                label = { Text("Nome dell'App") },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        item {Spacer(modifier = Modifier.height(8.dp))}
-        item {
-            Button(
-                onClick = {launcherViewModel.launchAppByName(inputText, context)},
-            ) {
-                Text("Lancia App")
+    Column(modifier = Modifier.fillMaxSize()) { // Occupa tutto lo spazio disponibile
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f) // Fai in modo che la LazyColumn occupi tutto lo spazio disponibile tranne quello necessario per TextField e Button
+                .padding(16.dp)
+        ) {
+            item {
+                Text(text = launcherViewModel.debugText, modifier = Modifier.padding(bottom = 8.dp))
             }
+        }
+        TextField(
+            value = inputText,
+            onValueChange = { inputText = it },
+            label = { Text("Nome dell'App") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp) // Aggiungi padding se necessario
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = { launcherViewModel.launchAppByName(inputText, context) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp) // Aggiungi padding per mantenere consistenza
+        ) {
+            Text("Lancia App")
         }
     }
 }
