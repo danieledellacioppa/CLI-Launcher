@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
     lateinit var launcherViewModel: LauncherViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        launcherViewModel = LauncherViewModel(applicationContext)
+        launcherViewModel = LauncherViewModel(application)
         setContent {
             CLILauncherTheme {
                 Surface(
