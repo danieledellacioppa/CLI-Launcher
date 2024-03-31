@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +18,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LauncherViewModel(application: Application) : AndroidViewModel(application) {
-    var debugText by mutableStateOf("CLI Launcher\n")
-
     private val _appList = MutableStateFlow<List<ApplicationInfo>>(emptyList())
-    var appList: StateFlow<List<ApplicationInfo>> = _appList
+    val appList: StateFlow<List<ApplicationInfo>> = _appList
+
 
     var packageManager: PackageManager
 
@@ -40,8 +40,6 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             _appList.value = apps
         }
     }
-
-
 
     private fun registerAppInstallUninstallReceiver() {
         val filter = IntentFilter().apply {
@@ -63,40 +61,4 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         getApplication<Application>().unregisterReceiver(AppInstallUninstallReceiver { updateAppList() })
     }
 
-    fun appendDebugText(text: String) {
-        debugText += text
-    }
-
-    fun clearDebugText() {
-        debugText = "CLI Launcher\n"
-    }
-
-    fun launchAppByName(appName: String, context: Context) {
-//        appendDebugText("Lancio app: $appName\n")
-
-        val packageName = findAppPackageByName(appName, packageManager)
-//        appendDebugText("Package: $packageName\n")
-
-        packageName?.let {
-            val launchIntent = packageManager.getLaunchIntentForPackage(it)
-            if (launchIntent != null) {
-                context.startActivity(launchIntent)
-            } else {
-                Toast.makeText(context, "App non trovata", Toast.LENGTH_SHORT).show()
-                appendDebugText("App non trovata\n")
-            }
-        }
-    }
-
-    fun findAppPackageByName(appName: String, packageManager: PackageManager): String? {
-        clearDebugText()
-        for (app in appList.value) {
-            appendDebugText(app.loadLabel(packageManager).toString() + "\n")
-            val label = app.loadLabel(packageManager).toString()
-            if (label.equals(appName, ignoreCase = true)) {
-                return app.packageName
-            }
-        }
-        return null
-    }
 }
